@@ -1,14 +1,49 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useAppStore } from '../stores/useAppStore';
 
 export default function Header() {
+  const [ searchFilters, setSearchFilters ] = useState({
+    ingredient: "",
+    category: ""
+  });
   const location = useLocation();
+  const { fetchCategories, categories, searchRecipes, showNotification } = useAppStore();
 
   const { pathname } = location;
 
   const isHomePage = useMemo(() => pathname === '/', [pathname]);
 
   //const isFavoritesPage = useMemo(() => pathname === '/favoritos', [pathname]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>
+  ) => {
+    setSearchFilters({
+      ...searchFilters,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+
+      //Validacion
+
+      if (Object.values(searchFilters).includes("")) {
+        return showNotification({
+          text: 'Todos los campos son obligatorios',
+          error: true,
+        });
+      }
+
+      //Consulta recetas
+      await searchRecipes(searchFilters);
+  }
 
   return (
     <header
@@ -46,7 +81,7 @@ export default function Header() {
         </div>
 
         {isHomePage && (
-          <form className="md:w-1/2 2xl:w-1/3 bg-orange-400 my-32 p-10 rounded-lg shadow space-y-6 ">
+          <form onSubmit={handleSubmit} className="md:w-1/2 2xl:w-1/3 bg-orange-400 my-32 p-10 rounded-lg shadow space-y-6 ">
             <div className="space-y-4">
               <label
                 htmlFor="ingredient"
@@ -60,12 +95,14 @@ export default function Header() {
                 name="ingredient"
                 className="p-3 w-full rounded-lg focus:outline-none bg-gray-50"
                 placeholder="Nombre o ingrediente. Ej: Vodka, Tequila, Café"
+                onChange={handleChange}
+                value={searchFilters.ingredient}
               />
             </div>
 
             <div className="space-y-4">
               <label
-                htmlFor="ingredient"
+                htmlFor="category"
                 className="block text-white uppercase font-extrabold text-lg"
               >
                 Categoría
@@ -74,8 +111,18 @@ export default function Header() {
                 id="category"
                 name="category"
                 className="p-3 w-full rounded-lg focus:outline-none bg-gray-50"
+                onChange={handleChange}
+                value={searchFilters.category}
               >
                 <option value="">--Seleccione--</option>
+                {categories.drinks.map((category) => (
+                  <option
+                    key={category.strCategory}
+                    value={category.strCategory}
+                  >
+                    {category.strCategory}
+                  </option>
+                ))}
               </select>
             </div>
             <input
