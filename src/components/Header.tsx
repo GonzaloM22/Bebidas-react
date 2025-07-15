@@ -1,14 +1,21 @@
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAppStore } from '../stores/useAppStore';
 
 export default function Header() {
-  const [ searchFilters, setSearchFilters ] = useState({
-    ingredient: "",
-    category: ""
+  const [searchFilters, setSearchFilters] = useState({
+    ingredient: '',
+    category: '',
   });
   const location = useLocation();
-  const { fetchCategories, categories, searchRecipes, showNotification } = useAppStore();
+  const { fetchCategories, categories, searchRecipes, showNotification } =
+    useAppStore();
 
   const { pathname } = location;
 
@@ -18,7 +25,7 @@ export default function Header() {
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>
@@ -30,20 +37,20 @@ export default function Header() {
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
+    e.preventDefault();
 
-      //Validacion
+    //Validacion
 
-      if (Object.values(searchFilters).includes("")) {
-        return showNotification({
-          text: 'Todos los campos son obligatorios',
-          error: true,
-        });
-      }
+    if (Object.values(searchFilters).includes('')) {
+      return showNotification({
+        text: 'Todos los campos son obligatorios',
+        error: true,
+      });
+    }
 
-      //Consulta recetas
-      await searchRecipes(searchFilters);
-  }
+    //Consulta recetas
+    await searchRecipes(searchFilters);
+  };
 
   return (
     <header
@@ -77,11 +84,25 @@ export default function Header() {
             >
               Favoritos
             </NavLink>
+
+            <NavLink
+              to="/generar"
+              className={({ isActive }) =>
+                isActive
+                  ? 'text-orange-500 uppercase font-bold'
+                  : 'text-white uppercase font-bold'
+              }
+            >
+              Generar con IA
+            </NavLink>
           </nav>
         </div>
 
         {isHomePage && (
-          <form onSubmit={handleSubmit} className="md:w-1/2 2xl:w-1/3 bg-orange-400 my-32 p-10 rounded-lg shadow space-y-6 ">
+          <form
+            onSubmit={handleSubmit}
+            className="md:w-1/2 2xl:w-1/3 bg-orange-400 my-32 p-10 rounded-lg shadow space-y-6 "
+          >
             <div className="space-y-4">
               <label
                 htmlFor="ingredient"
